@@ -1,0 +1,91 @@
+#Version:1.0
+#function:
+#1.disk usage
+#2.deploy the package
+---
+- hosts: '{{group}}'  #the group variable can invoke the "hosts_group" below
+  gather_facts: no
+#  remote_user: root
+  vars:
+    package: 
+#  vars_prompt:
+#  - name: "hosts_group"
+#    prompt: "hosts_group name"
+#    private: no
+#  - name: "package_name"  ### a variables can be invoked in the task line###
+#    prompt: "Please input the package(Will Be depoyed) name:"
+#    private: no  ## if this section be set "yes",the blank you input is not visible
+  tasks:      
+  - name: show the disk usage
+    shell: df -h
+    register: result
+  - debug: var=result.stdout_lines
+  - name: rest for 10s
+    shell: sleep 10
+
+  - name: Unarchive zip package and copy to Target-Server
+    unarchive: src="/home/ec2-user/{{package}}.tar.gz" dest=/home/ copy=yes
+
+  - name: copy x-module.sh to Target-Server
+    copy: src=x-module.sh dest=/home/ mode=755 force=yes
+    register: result
+  - debug: result
+
+  - name: Install IPVTSIPServer
+    shell: /home/x-module.sh {{group}}
+    args:
+        chdir: "/home/{{package}}"
+        executable: /bin/bash  
+    register: result
+  - debug: var=result
+
+  - name: Display process of the deployed Program
+    shell: ps -ef|grep {{group}}
+    register: result
+  - debug: var=result.stdout_lines
+  - name: Change Execution for opensips/asterisk
+    file: path=/opt state=directory mode="o+x"
+    when: group == "asterisk" or group == "opensips"
+    register: result
+  - debug: var=result
+
+#    notify:
+#        - show process
+
+
+#  handlers:
+#        - name: show process
+         # shell: "ps -ef|grep {{group}}"
+#          debug: msg="handler ps -ef|grep {{group}}"
+
+##########################handlers usage#############
+#- hosts: '{{team}}'
+#  remote_user: root
+#  tasks:
+#  - name: whoami
+#    copy: src=/etc/hosts dest=/root/hosts.dest
+#    notify:
+#        - clear copy
+#  handlers:
+#        - name: clear copy
+#          shell: mv /root/hosts.dest hosts.del
+##############when usage####
+#tasks:
+#  - name: "shutdown Debin system"
+#    command: /sbin/shutdown -t now
+#    when: ansible_os_family == "Debian"
+
+#add several users
+#- name: add several users
+#  user: name={{item}} state=present group=wheel
+#  with_items:
+#    - testuser1
+#    - testuser2
+
+#- name: add several users
+#  user: name={{ item.name }} state=present groups={{ item.groups }}
+#  with_items:
+#    - { name: 'testuser1', groups: 'wheel' }
+#    - { name: 'testuser2', groups: 'root' }
+#jinja2 for filter
+
