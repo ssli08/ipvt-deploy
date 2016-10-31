@@ -1,4 +1,4 @@
-#Version:1.0
+#Version:1.1
 #function:
 #1.disk usage
 #2.deploy the package
@@ -44,7 +44,7 @@
     register: result
   - debug: var=result.stdout_lines
   - name: Change Execution for opensips/asterisk
-    file: path=/opt state=directory mode="o+x"
+    file: path=/opt state=directory mode="o+x" recurse=yes
     when: group == "asterisk" or group == "opensips"
     register: result
   - debug: var=result
