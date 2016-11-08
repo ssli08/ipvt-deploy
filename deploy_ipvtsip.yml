@@ -2,8 +2,10 @@
 #function:
 #1.disk usage
 #2.deploy the package
+#3.for XServer add execution permit
+#4.validate for the deploy
 ---
-- hosts: '{{group}}'  #the group variable can invoke the "hosts_group" below
+- hosts: "{{group}}"  #the group variable can invoke the "hosts_group" below
   gather_facts: no
 #  remote_user: root
   vars:
@@ -29,7 +31,7 @@
   - name: copy x-module.sh to Target-Server
     copy: src=x-module.sh dest=/home/ mode=755 force=yes
     register: result
-  - debug: result
+  - debug: var=result
 
   - name: Install IPVTSIPServer
     shell: /home/x-module.sh {{group}}
@@ -49,6 +51,10 @@
     register: result
   - debug: var=result
 
+  - name: Validate the deployment
+    shell: ls -lt /opt|awk 'NR<=7'
+    register: result
+  - debug: var=result.stdout_lines
 #    notify:
 #        - show process
 

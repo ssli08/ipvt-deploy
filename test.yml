@@ -1,0 +1,44 @@
+---
+- hosts: opensips
+  gather_facts: False
+  tasks:
+  - name: show the disk usage
+    shell: df -h|awk 'NR==5 {print $5}'|sed 's/%//g'
+    register: disk_usage
+  - debug: var=disk_usage
+
+  - name: rest for 10s
+    shell: exit 1
+    when: disk_usage.stdout|int > 80
+
+#  - name: Validate the port status
+#    wait_for: host=0.0.0.0 port=8000 delay=3 timeout=20
+#    register: result
+#    - name: Get file count
+#      shell: ls /tmp | wc -l
+#      register: filecount
+#    - debug: var=filecount
+#    
+#    - name: Show a debug message
+#      debug: msg="{{ inventory_hostname }}"
+#      when: filecount.stdout|int > 100
+
+
+#- host: "{{host}}"
+#  remote_user: root
+#  gather_facts = yes  
+#   
+#  tasks:
+#    - shell: date +%Y-%m-%d_%T
+#      register: ABC                                \\定义上面的语句为 ABC
+#    - debug: msg="Current time is {{ABC.stdout}}"  \\打印出上面定义的结果
+#     
+#    - command: uptime
+#    - shell: echo "1099"
+#      register: result                    \\定义上面的语句为 result
+#    - shell: date
+#      when: result.stdout.find("9") != -1  \\当定义的result输出值里面包含有find里面的 "values" 的时候就执行上面的 date 任务，否则就不执行，skip
+#
+#    - shell: echo "hello world"
+#      when: ansible_distribution == 'CentOS' \\当内置函数"ansible_distribution"的值等于 'CentOS'的时候就执行上面的 echo 命令。此函数的结果是通过 gather_fasks 来收集 setup里面的数据。
+#           
