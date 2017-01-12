@@ -2,10 +2,12 @@
 #for stop-status check
 
 test(){
-    if [ $? = 0 ];then
+    if [ "$pid" = '' ];then
+        echo "$1 service is NOT running!"
+    elif [ $? = 0 ];then
         echo "$1 is stopped OK!!!"
-    else    
-        exit 1;echo "$1 stopped Faillure!!!"
+    else
+        echo "$1 stopped Faillure!!!" && exit 1
     fi
 }
 
@@ -13,7 +15,8 @@ instCheck(){
     if [ $? = 0 ];then
         echo 'Installation OK!!!'
     else
-        exit 1;echo "Exit installation,Got ERROR!!!"
+#        exit 1;echo "Exit installation,Got ERROR!!!"
+	echo -e "\033[33mError: Cancel installation,Disk full!\033[0m";exit 1
     fi
 }
 
